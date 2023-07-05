@@ -27,5 +27,8 @@ public class Program
         Console.WriteLine($"Certificate: {metadataValues.certificate}\n");
         Console.WriteLine($"Algorithm: {metadataValues.algorithm}\n");
         Console.WriteLine($"Signature: {metadataValues.signature}\n");
+
+        SignatureVerification verification = new SignatureVerification(metadataValues, zipManager.xlsmPath);
+        verification.verifySignature();
     }
 }
