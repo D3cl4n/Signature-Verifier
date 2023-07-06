@@ -42,7 +42,7 @@ namespace Signature_Verifier
             return filename;
         }
 
-        public List<XmlNode?> getXMLNodes()
+        public (List<XmlNode?>, XmlDocument) getXMLNodes()
         {
             if (xlsmPath == null)
             {
@@ -51,6 +51,10 @@ namespace Signature_Verifier
             }
             using (ZipArchive zip = ZipFile.OpenRead(xlsmPath))
             {
+                foreach (ZipArchiveEntry entry in zip.Entries.ToArray())
+                {
+                    Console.WriteLine(entry.Name);
+                }
                 ZipArchiveEntry? archiveEntry = zip.GetEntry(signatureXML);
                 if (archiveEntry == null)
                 {
@@ -63,8 +67,7 @@ namespace Signature_Verifier
                 XmlDocument signatureDocument = new XmlDocument();
                 signatureDocument.Load(tempFileName);
 
-                File.Delete(tempFileName);
-                return GetAllNodes(signatureDocument.DocumentElement);
+                return (GetAllNodes(signatureDocument.DocumentElement), signatureDocument);
             }
         }
         public ZipManager()

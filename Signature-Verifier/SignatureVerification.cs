@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace Signature_Verifier
 {
@@ -36,10 +37,10 @@ namespace Signature_Verifier
         }
         public void verifySignature()
         {
-            string pemCertificate = "-----BEGIN CERTIFICATE-----\n" + metadata.certificate + "\n-----END CERTIFICATE-----";
-            byte[] certificateData = Encoding.ASCII.GetBytes(pemCertificate);
+            byte[] certificateData = Convert.FromBase64String(metadata.certificate);
             X509Certificate2 cert = new X509Certificate2(certificateData);
             RSA publicKey = cert.GetRSAPublicKey();
+
             if (publicKey == null)
             {
                 Console.WriteLine("Null pub key");
@@ -47,20 +48,18 @@ namespace Signature_Verifier
             byte[]? actualHash = computeActualHash();
             string hexHash = byteArrToHex(actualHash).Replace("-", "");
             Console.WriteLine($"Actual hash of xlsm: {hexHash}");
-            string pemSignature = "-----BEGIN SIGNATURE-----\n" + metadata.signature + "\n-----END SIGNATURE-----";
-            byte[]? digitalSignature = Encoding.ASCII.GetBytes(pemSignature);
-            byte[] actualData = File.ReadAllBytes(targetFile);
+            byte[]? digitalSignature = Convert.FromBase64String(metadata.signature);
+            Console.WriteLine(metadata.hashedContents.Length);
 
-            bool isValid = publicKey.VerifyData(actualData, digitalSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
-
-            if (isValid)
+            try
             {
-                Console.WriteLine("Signature is valid!");
+                bool isValid = publicKey.VerifyData(metadata.hashedContents, digitalSignature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                Console.WriteLine(isValid);
             }
 
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Signature is not valid");
+                Console.WriteLine(ex.Message);
             }
         }
 

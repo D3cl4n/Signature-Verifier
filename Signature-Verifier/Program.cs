@@ -20,9 +20,10 @@ public class Program
         zipManager.xlsmPath = args[0];
         zipManager.statusCodes = codes;
         Console.WriteLine($"Extracting metadata from: {zipManager.xlsmPath}");
-        List<XmlNode?> nodes = zipManager.getXMLNodes();
+        (List<XmlNode?> nodes, XmlDocument doc) = zipManager.getXMLNodes();
         XmlParser xmlParser = new XmlParser();
         xmlParser.xmlNodes = nodes;
+        xmlParser.document = doc;
         metadataValues = xmlParser.parseXMLNodes();
         Console.WriteLine($"Certificate: {metadataValues.certificate}\n");
         Console.WriteLine($"Algorithm: {metadataValues.algorithm}\n");
